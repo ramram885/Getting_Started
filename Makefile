@@ -1,4 +1,4 @@
-PROJ = sample1
+PROJ = sample1/Debug/sample1
 CPU ?= cortex-m3
 BOARD ?= stm32vldiscovery
 

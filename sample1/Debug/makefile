@@ -52,6 +52,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 sample1.list \
 
+PROJ = sample1
+CPU ?= cortex-m3
+BOARD ?= stm32vldiscovery
 
 # All Target
 all: main-build
@@ -60,10 +63,10 @@ all: main-build
 main-build: sample1.elf secondary-outputs
 
 # Tool invocations
-sample1.elf sample1.map: $(OBJS) $(USER_OBJS) D:\Ramya\STM32_Workspaces\sample1\STM32F100RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "sample1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\Ramya\STM32_Workspaces\sample1\STM32F100RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="sample1.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-	@echo 'Finished building target: $@'
-	@echo ' '
+#sample1.elf sample1.map: $(OBJS) $(USER_OBJS) D:\Ramya\STM32_Workspaces\sample1\STM32F100RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+#	arm-none-eabi-gcc -o "sample1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\Ramya\STM32_Workspaces\sample1\STM32F100RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="sample1.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+#	@echo 'Finished building target: $@'
+#	@echo ' '
 
 default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-size  $(EXECUTABLES)
@@ -90,5 +93,11 @@ warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
 .PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+
+qemu:
+	qemu-system-arm -S -M $(BOARD) -cpu $(CPU) -nographic -kernel $(PROJ).elf -gdb tcp::1234
+
+gdb:
+	gdb-multiarch -q $(PROJ).elf -ex "target remote localhost:1234"
 
 -include ../makefile.targets
